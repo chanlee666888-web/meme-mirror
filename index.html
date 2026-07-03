@@ -3,174 +3,276 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>表情镜 · Meme Mirror</title>
+<title>Meme Mirror</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#1c1b1f;
-    --paper:#fdf6ec;
-    --stamp:#c0392b;
-    --stamp-dark:#8e2a1f;
-    --gold:#d9a441;
-    --line:#2b2a28;
-    --muted:#8a8378;
-    --green:#4caf50;
+    --mist-blue:#c9d9e6;
+    --lily-lavender:#cbc0da;
+    --blush:#ecd3d6;
+    --sage:#c3d3bd;
+    --cream:#f6f2ec;
+    --ink:#3d4148;
+    --ink-soft:#6b6f76;
+    --accent:#8a7ca8;
+    --accent-deep:#5d6b8a;
+    --card:rgba(255,255,255,0.62);
+    --card-strong:rgba(255,255,255,0.85);
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
-    background:var(--paper);
-    background-image:radial-gradient(circle at 1px 1px, rgba(0,0,0,0.05) 1px, transparent 0);
-    background-size:18px 18px;
-    color:var(--ink);
-    font-family:"Songti SC","STSong","Noto Serif SC",serif;
     min-height:100vh;
-    padding:28px 18px 60px;
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    background:var(--cream);
+    position:relative;
+    overflow-x:hidden;
+    padding:40px 20px 80px;
   }
-  .wrap{max-width:1080px;margin:0 auto;}
-  header{text-align:center;margin-bottom:22px;}
-  header h1{
-    font-size:clamp(28px,6vw,48px);
-    margin:0; letter-spacing:5px; font-weight:900;
+  /* Monet blobs */
+  .blob{
+    position:fixed; border-radius:50%; filter:blur(70px); opacity:0.55; z-index:0;
+    animation:drift 26s ease-in-out infinite alternate;
   }
-  header h1 .stamp{
-    display:inline-block; color:var(--stamp);
-    border:3px solid var(--stamp); border-radius:6px;
-    padding:2px 10px; transform:rotate(-3deg); margin-right:10px;
+  .blob.b1{width:480px; height:480px; background:var(--mist-blue); top:-160px; left:-120px; animation-delay:0s;}
+  .blob.b2{width:420px; height:420px; background:var(--blush); bottom:-140px; right:-100px; animation-delay:4s;}
+  .blob.b3{width:360px; height:360px; background:var(--sage); top:40%; left:60%; animation-delay:8s;}
+  .blob.b4{width:300px; height:300px; background:var(--lily-lavender); bottom:10%; left:5%; animation-delay:2s;}
+  @keyframes drift{
+    0%{ transform:translate(0,0) scale(1); }
+    100%{ transform:translate(30px,-24px) scale(1.08); }
   }
-  header p{color:var(--muted); font-size:13px; letter-spacing:1.5px; margin-top:6px;}
 
-  .layout{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
-  @media (max-width:820px){ .layout{grid-template-columns:1fr;} }
+  .wrap{max-width:1080px; margin:0 auto; position:relative; z-index:1;}
+  header{text-align:center; margin-bottom:34px;}
+  header .eyebrow{
+    font-size:11px; letter-spacing:4px; color:var(--accent-deep);
+    text-transform:uppercase; font-weight:600; margin-bottom:6px;
+  }
+  header h1{
+    font-family:'Fraunces',serif; font-weight:600; font-style:italic;
+    font-size:clamp(38px,7vw,64px); margin:0; letter-spacing:0.5px;
+    color:var(--ink);
+  }
+  header p{
+    color:var(--ink-soft); font-size:14px; margin-top:10px; letter-spacing:0.3px;
+  }
+
+  .layout{display:grid; grid-template-columns:1.05fr 1fr; gap:22px;}
+  @media (max-width:840px){ .layout{grid-template-columns:1fr;} }
 
   .card{
-    background:#fffefb; border:1.5px solid var(--line); border-radius:4px;
-    padding:16px; position:relative; box-shadow:6px 6px 0 rgba(0,0,0,0.08);
+    background:var(--card);
+    backdrop-filter:blur(18px) saturate(140%);
+    -webkit-backdrop-filter:blur(18px) saturate(140%);
+    border:1px solid rgba(255,255,255,0.7);
+    border-radius:26px;
+    padding:22px;
+    box-shadow:0 20px 50px -20px rgba(90,80,120,0.25);
   }
-  .card::before{
-    content:attr(data-tag); position:absolute; top:-13px; left:16px;
-    background:var(--ink); color:var(--paper); font-size:11px;
-    letter-spacing:2.5px; padding:3px 10px; border-radius:2px;
+
+  .mode-toggle{
+    display:flex; gap:6px; background:rgba(255,255,255,0.5);
+    padding:5px; border-radius:16px; margin-bottom:16px;
   }
+  .mode-toggle button{
+    flex:1; border:none; background:transparent; padding:9px 6px;
+    font-family:'Inter'; font-size:13px; font-weight:600; color:var(--ink-soft);
+    border-radius:12px; cursor:pointer; transition:all .2s ease; letter-spacing:0.3px;
+  }
+  .mode-toggle button.active{
+    background:var(--card-strong); color:var(--accent-deep);
+    box-shadow:0 6px 14px -6px rgba(90,80,120,0.35);
+  }
+
   .video-box{
-    position:relative; width:100%; aspect-ratio:4/3; background:#111;
-    border-radius:3px; overflow:hidden; border:1px solid #000;
+    position:relative; width:100%; aspect-ratio:4/3; background:#20222a;
+    border-radius:18px; overflow:hidden;
   }
   video, canvas.overlay{
     position:absolute; top:0; left:0; width:100%; height:100%;
     object-fit:cover; transform:scaleX(-1);
   }
-  .badge{
-    position:absolute; bottom:9px; left:9px; background:rgba(0,0,0,0.65);
-    color:#fff; padding:5px 11px; border-radius:20px; font-size:12px;
-    letter-spacing:1px; display:flex; gap:7px; align-items:center;
+  .idle-invite{
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:14px; text-align:center;
+    background:linear-gradient(160deg, rgba(60,60,80,0.55), rgba(40,40,55,0.75));
+    color:#fff; padding:20px;
   }
-  .badge .dot{width:7px;height:7px;border-radius:50%;background:var(--green);}
-  .controls{margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;}
-  button{
-    font-family:inherit; border:1.5px solid var(--ink); background:var(--gold);
-    color:var(--ink); padding:8px 16px; border-radius:3px; font-size:13px;
-    letter-spacing:1.5px; cursor:pointer; font-weight:700; transition:transform .12s ease;
+  .idle-invite .pulse{
+    width:64px; height:64px; border-radius:50%;
+    background:rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center;
+    font-size:26px; animation:pulse 1.8s ease-in-out infinite;
   }
-  button:hover{transform:translateY(-2px);}
-  button:active{transform:translateY(0);}
-  button.secondary{background:#fff;}
-  button.tiny{padding:5px 10px; font-size:11px;}
-  button:disabled{opacity:.5; cursor:not-allowed; transform:none;}
+  @keyframes pulse{
+    0%,100%{ box-shadow:0 0 0 0 rgba(255,255,255,0.35); }
+    50%{ box-shadow:0 0 0 16px rgba(255,255,255,0); }
+  }
+  .idle-invite p{margin:0; font-size:13.5px; line-height:1.7; max-width:260px; color:rgba(255,255,255,0.9);}
+  .idle-invite button{
+    font-family:'Inter'; font-weight:600; letter-spacing:0.5px; font-size:13.5px;
+    background:#fff; color:var(--ink); border:none; padding:11px 22px;
+    border-radius:30px; cursor:pointer; transition:transform .15s ease;
+  }
+  .idle-invite button:hover{transform:translateY(-2px);}
 
-  .status-line{margin-top:8px; font-size:12.5px; color:var(--muted); min-height:16px; line-height:1.6;}
+  .live-caption{
+    position:absolute; bottom:10px; left:10px; right:10px;
+    background:rgba(30,30,38,0.55); backdrop-filter:blur(6px);
+    color:#fff; padding:8px 14px; border-radius:14px; font-size:12.5px;
+    letter-spacing:0.3px; display:flex; align-items:center; gap:8px;
+  }
+  .live-caption .dot{width:7px; height:7px; border-radius:50%; background:#8fe3a8; flex-shrink:0;}
 
-  .result-title{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:10px;}
-  .result-title .label{font-size:20px; font-weight:900;}
-  .result-title .conf{font-size:11px; color:var(--muted);}
+  .controls{margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;}
+  button.ghost{
+    font-family:'Inter'; border:1px solid rgba(90,80,120,0.3); background:transparent;
+    color:var(--accent-deep); padding:9px 16px; border-radius:20px; font-size:12.5px;
+    font-weight:600; cursor:pointer; letter-spacing:0.3px; transition:all .15s ease;
+  }
+  button.ghost:hover{background:rgba(255,255,255,0.5);}
+  button.ghost:disabled{opacity:0.4; cursor:not-allowed;}
 
-  .meme-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
-  .meme-cell{
-    aspect-ratio:1; border:1.5px solid var(--line); border-radius:6px;
-    overflow:hidden; position:relative; background:#f4efe4;
+  .upload-strip{
+    margin-top:16px; padding:14px 16px; border-radius:18px;
+    background:linear-gradient(120deg, rgba(203,192,218,0.35), rgba(236,211,214,0.35));
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
   }
-  .meme-cell img{width:100%; height:100%; object-fit:cover; display:block;}
-  .meme-cell.seed{
-    display:flex; align-items:center; justify-content:center; font-size:36px;
-    border-style:dashed; color:var(--muted);
+  .upload-strip .msg{font-size:12.5px; color:var(--ink-soft); line-height:1.6; max-width:260px;}
+  .upload-strip button{
+    font-family:'Inter'; border:none; background:var(--accent); color:#fff;
+    padding:10px 18px; border-radius:20px; font-size:12.5px; font-weight:700;
+    letter-spacing:0.3px; cursor:pointer; white-space:nowrap; transition:transform .15s ease;
   }
-  .meme-cell .who{
-    position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.55);
-    color:#fff; font-size:9px; padding:2px 5px; letter-spacing:0.5px;
-  }
-  .empty-hint{color:var(--muted); font-size:12.5px; text-align:center; padding:26px 8px; line-height:1.9;}
-
-  .upload-zone{
-    margin-top:14px; padding-top:12px; border-top:1.5px dashed var(--line);
-  }
-  .upload-zone .row{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
-  select{
-    font-family:inherit; border:1.5px solid var(--ink); border-radius:3px;
-    padding:7px 10px; font-size:13px; background:#fff;
-  }
-  .upload-note{font-size:11px; color:var(--muted); margin-top:6px; line-height:1.6;}
+  .upload-strip button:hover{transform:translateY(-2px);}
+  .upload-strip button:disabled{opacity:0.45; cursor:not-allowed; transform:none;}
   #fileInput{display:none;}
 
-  .lib-count{
-    font-size:11px; color:var(--stamp); letter-spacing:1px; margin-top:2px;
+  .result-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:4px;}
+  .result-head .tag{
+    font-size:10.5px; letter-spacing:2px; color:var(--accent-deep); text-transform:uppercase; font-weight:700;
   }
-  footer{text-align:center; margin-top:26px; font-size:11px; color:var(--muted); letter-spacing:1px; line-height:1.8;}
+  .result-head .sim{font-size:11px; color:var(--ink-soft);}
+  .result-title{
+    font-family:'Fraunces',serif; font-style:italic; font-weight:600;
+    font-size:21px; margin:2px 0 14px; color:var(--ink);
+  }
+  .meme-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+  .meme-cell{
+    aspect-ratio:1; border-radius:14px; overflow:hidden; position:relative;
+    background:rgba(255,255,255,0.4); border:1px solid rgba(255,255,255,0.7);
+  }
+  .meme-cell img{width:100%; height:100%; object-fit:cover; display:block;}
+  .meme-cell .sim-badge{
+    position:absolute; top:6px; right:6px; background:rgba(30,30,38,0.55);
+    color:#fff; font-size:9.5px; padding:2px 7px; border-radius:10px; letter-spacing:0.3px;
+  }
+  .empty-hint{
+    color:var(--ink-soft); font-size:12.5px; text-align:center; padding:34px 12px; line-height:2;
+  }
+
+  /* success modal */
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(40,35,50,0.35); backdrop-filter:blur(3px);
+    display:flex; align-items:center; justify-content:center; z-index:50;
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
+  }
+  .modal-backdrop.show{opacity:1; pointer-events:auto;}
+  .modal{
+    background:var(--card-strong); border-radius:22px; padding:30px 34px;
+    text-align:center; max-width:280px; transform:translateY(14px); transition:transform .25s ease;
+    box-shadow:0 30px 60px -20px rgba(60,50,80,0.4);
+  }
+  .modal-backdrop.show .modal{transform:translateY(0);}
+  .modal .icon{font-size:34px; margin-bottom:6px;}
+  .modal h3{font-family:'Fraunces',serif; font-style:italic; margin:0 0 6px; font-size:19px;}
+  .modal p{font-size:12.5px; color:var(--ink-soft); margin:0; line-height:1.6;}
+
+  footer{
+    text-align:center; margin-top:30px; font-size:11px; color:var(--ink-soft);
+    letter-spacing:0.5px; line-height:1.9; position:relative; z-index:1;
+  }
 </style>
 </head>
 <body>
+<div class="blob b1"></div>
+<div class="blob b2"></div>
+<div class="blob b3"></div>
+<div class="blob b4"></div>
+
 <div class="wrap">
   <header>
-    <h1><span class="stamp">镜</span>表情镜 Meme Mirror</h1>
-    <p>比划一个手势 · 做一个表情 · 索引出大家共享的同款表情包</p>
+    <div class="eyebrow">gesture · expression · pose</div>
+    <h1>Meme Mirror</h1>
+    <p>比划一个动作，让镜头帮你找到最像的表情包</p>
   </header>
 
   <div class="layout">
-    <div class="card" data-tag="摄像头">
+    <div class="card">
+      <div class="mode-toggle">
+        <button data-mode="hand" class="active">✋ 手势</button>
+        <button data-mode="face">🙂 表情</button>
+        <button data-mode="pose">🕺 动作</button>
+      </div>
+
       <div class="video-box">
         <video id="video" autoplay playsinline muted></video>
         <canvas id="overlay" class="overlay"></canvas>
-        <div class="badge"><span class="dot" id="liveDot"></span><span id="badgeText">未启动</span></div>
-      </div>
-      <div class="controls">
-        <button id="startBtn">启动摄像头</button>
-        <button id="stopBtn" class="secondary" disabled>停止</button>
-      </div>
-      <div class="status-line" id="statusLine">点击「启动摄像头」并允许权限。识别在本地浏览器完成；上传的表情包会存进所有人共享的图库。</div>
-
-      <div class="upload-zone">
-        <div class="row">
-          <select id="tagSelect"></select>
-          <button class="tiny secondary" id="uploadBtn">＋ 上传一张真实表情包到这个分类</button>
-          <input type="file" id="fileInput" accept="image/*">
+        <div class="idle-invite" id="idleInvite">
+          <div class="pulse">📷</div>
+          <p>开启摄像头，比划一个手势、做个表情，或摆个姿势试试看</p>
+          <button id="startBtn">开启摄像头</button>
         </div>
-        <div class="upload-note">上传的图片会公开给所有打开这个网页的人查看，请不要上传隐私或不合适的内容。</div>
+        <div class="live-caption" id="liveCaption" style="display:none;">
+          <span class="dot"></span><span id="captionText">识别中…</span>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="ghost" id="stopBtn" disabled>停止摄像头</button>
+      </div>
+
+      <div class="upload-strip">
+        <div class="msg" id="uploadInvite">保持住这个动作，把它变成表情包库里的一员吧</div>
+        <button id="uploadBtn" disabled>抓拍并上传</button>
+        <input type="file" id="fileInput" accept="image/*">
       </div>
     </div>
 
-    <div class="card" data-tag="匹配结果">
-      <div class="result-title">
-        <div class="label" id="resultLabel">等待识别…</div>
-        <div class="conf" id="resultConf"></div>
+    <div class="card">
+      <div class="result-head">
+        <span class="tag" id="modeTag">HAND</span>
+        <span class="sim" id="simInfo"></span>
       </div>
-      <div class="lib-count" id="libCount"></div>
-      <div id="memeArea" style="margin-top:8px;">
-        <div class="empty-hint">✋ 举起手掌、比个耶、点个赞、挥拳<br>😄 笑一笑、张嘴惊讶、皱眉<br>匹配的表情包会出现在这里</div>
+      <div class="result-title" id="resultTitle">等待识别…</div>
+      <div id="memeArea">
+        <div class="empty-hint">开启摄像头后，这里会实时出现和你动作最像的表情包</div>
       </div>
     </div>
   </div>
 
-  <footer>手势模型：MediaPipe GestureRecognizer · 表情模型：MediaPipe FaceLandmarker（Blendshapes）<br>图库为共享存储，所有打开此页面的人共用同一批表情包</footer>
+  <footer>手势 / 动作骨架点由 MediaPipe 提供 · 表情由 52 维面部肌肉强度向量描述<br>识别在本地完成，不做固定分类，纯相似度匹配 · 图库由所有访问者共同上传</footer>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <div class="icon">✨</div>
+    <h3>上传成功</h3>
+    <p id="modalMsg">这个瞬间已经加入表情包库啦</p>
+  </div>
 </div>
 
 <script type="module">
 import {
-  GestureRecognizer, FaceLandmarker, FilesetResolver, DrawingUtils
+  GestureRecognizer, FaceLandmarker, PoseLandmarker, FilesetResolver, DrawingUtils
 } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs";
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-// ==== 在这里填入你的 Supabase 项目信息（Settings → API） ====
 const SUPABASE_URL = "https://eznngkxpxmrthyclvzmv.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_1QbYeQhwTJ--FG6Qwai_hA_c2xV2Xon";
-// ============================================================
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const video = document.getElementById('video');
@@ -178,151 +280,195 @@ const overlay = document.getElementById('overlay');
 const ctx = overlay.getContext('2d');
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
-const statusLine = document.getElementById('statusLine');
-const badgeText = document.getElementById('badgeText');
-const liveDot = document.getElementById('liveDot');
-const resultLabel = document.getElementById('resultLabel');
-const resultConf = document.getElementById('resultConf');
-const memeArea = document.getElementById('memeArea');
-const libCount = document.getElementById('libCount');
-const tagSelect = document.getElementById('tagSelect');
+const idleInvite = document.getElementById('idleInvite');
+const liveCaption = document.getElementById('liveCaption');
+const captionText = document.getElementById('captionText');
 const uploadBtn = document.getElementById('uploadBtn');
+const uploadInvite = document.getElementById('uploadInvite');
 const fileInput = document.getElementById('fileInput');
+const resultTitle = document.getElementById('resultTitle');
+const modeTag = document.getElementById('modeTag');
+const simInfo = document.getElementById('simInfo');
+const memeArea = document.getElementById('memeArea');
+const modalBackdrop = document.getElementById('modalBackdrop');
+const modalMsg = document.getElementById('modalMsg');
 
-let gestureRecognizer, faceLandmarker;
+let gestureRecognizer, faceLandmarker, poseLandmarker;
 let stream = null, running = false, rafId = null, lastVideoTime = -1;
-let currentCategory = 'None';
+let mode = 'hand'; // hand | face | pose
+let currentSnapshot = null; // { modality, vector, label }
+let lastQueryTime = 0;
 
-const CATEGORIES = {
-  Thumb_Up:   '点赞 👍',
-  Thumb_Down: '点踩 👎',
-  Victory:    '比耶 ✌️',
-  Open_Palm:  '举手/摊手 ✋',
-  Closed_Fist:'握拳 ✊',
-  ILoveYou:   '比心 🤟',
-  Pointing_Up:'食指上指 ☝️',
-  happy:      '开心大笑 😄',
-  smile:      '微笑 🙂',
-  surprised:  '惊讶 😮',
-  sad:        '难过 😢',
-  angry:      '生气 😠',
-  neutral:    '面无表情 😐',
-  None:       '未识别到手势/表情'
-};
-const SEED_EMOJI = {
-  Thumb_Up:'👍', Thumb_Down:'👎', Victory:'✌️', Open_Palm:'✋', Closed_Fist:'✊',
-  ILoveYou:'🤟', Pointing_Up:'☝️', happy:'😄', smile:'🙂', surprised:'😮',
-  sad:'😢', angry:'😠', neutral:'😐', None:'🤔'
+const MODE_META = {
+  hand: { tag:'HAND', title:'手势特征', invite:'摆好这个手势，把它变成表情包库里的一员吧' },
+  face: { tag:'FACE', title:'表情特征', invite:'保持住这个表情，抓拍上传给大家看看' },
+  pose: { tag:'POSE', title:'肢体动作特征', invite:'摆好这个姿势，上传成为新的动作表情包' },
 };
 
-// populate manual tag selector for uploads
-Object.entries(CATEGORIES).forEach(([key, label]) => {
-  if (key === 'None') return;
-  const opt = document.createElement('option');
-  opt.value = key; opt.textContent = label;
-  tagSelect.appendChild(opt);
+document.querySelectorAll('.mode-toggle button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-toggle button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    mode = btn.dataset.mode;
+    modeTag.textContent = MODE_META[mode].tag;
+    uploadInvite.textContent = MODE_META[mode].invite;
+    currentSnapshot = null;
+    uploadBtn.disabled = true;
+    resultTitle.textContent = '等待识别…';
+    memeArea.innerHTML = `<div class="empty-hint">切换到「${MODE_META[mode].title}」模式，做出动作后这里会出现匹配结果</div>`;
+  });
 });
 
-function setBadge(text, live){
-  badgeText.textContent = text;
-  liveDot.style.background = live ? '#4caf50' : '#c0392b';
+// ---------- 特征向量计算 ----------
+function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
+
+function handVector(lm){
+  const wrist = lm[0];
+  const scale = dist(lm[0], lm[9]) || 0.001;
+  const vec = [];
+  lm.forEach(p => { vec.push((p.x-wrist.x)/scale, (p.y-wrist.y)/scale); });
+  return vec;
+}
+function handDescription(lm){
+  const wrist = lm[0];
+  const tips = [4,8,12,16,20], pips = [2,5,9,13,17];
+  const names = ['拇指','食指','中指','无名指','小指'];
+  const extended = tips.map((t,i) => dist(wrist,lm[t]) > dist(wrist,lm[pips[i]]) * 1.15);
+  const activeNames = names.filter((_,i) => extended[i]);
+  if (activeNames.length === 0) return '握拳';
+  if (activeNames.length === 5) return '五指张开';
+  return activeNames.join('、') + ' 伸展';
 }
 
-// ---------- 共享存储：图库读写（Supabase） ----------
-async function saveMeme(category, dataUrl){
-  const { error } = await supabase.from('memes').insert({ category, image: dataUrl });
+const FACE_LABELS = {
+  mouthSmileLeft:'嘴角上扬', mouthSmileRight:'嘴角上扬',
+  jawOpen:'张大嘴巴',
+  eyeWideLeft:'瞪大眼睛', eyeWideRight:'瞪大眼睛',
+  browDownLeft:'皱眉', browDownRight:'皱眉',
+  browInnerUp:'眉毛上扬',
+  mouthFrownLeft:'嘴角下垂', mouthFrownRight:'嘴角下垂',
+  mouthPucker:'嘟嘴',
+  cheekPuff:'鼓腮',
+  eyeSquintLeft:'眯眼', eyeSquintRight:'眯眼',
+  noseSneerLeft:'皱鼻', noseSneerRight:'皱鼻',
+};
+function faceVector(categories){ return categories.map(c => c.score); }
+function faceDescription(categories){
+  const merged = {};
+  categories.forEach(c => {
+    const label = FACE_LABELS[c.categoryName];
+    if (!label) return;
+    merged[label] = Math.max(merged[label]||0, c.score);
+  });
+  const top = Object.entries(merged).filter(([,s])=>s>0.3).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  if (top.length === 0) return '平静';
+  return top.map(t=>t[0]).join('、');
+}
+
+const POSE_IDX = [0,11,12,13,14,15,16,23,24,25,26,27,28];
+function poseVector(lm){
+  const lHip = lm[23], rHip = lm[24];
+  const center = { x:(lHip.x+rHip.x)/2, y:(lHip.y+rHip.y)/2 };
+  const scale = dist(lm[11], lm[12]) || 0.001;
+  const vec = [];
+  POSE_IDX.forEach(i => { vec.push((lm[i].x-center.x)/scale, (lm[i].y-center.y)/scale); });
+  return vec;
+}
+function poseDescription(lm){
+  const lSh=lm[11], rSh=lm[12], lWr=lm[15], rWr=lm[16], lHip=lm[23], rHip=lm[24];
+  const shoulderY = (lSh.y+rSh.y)/2;
+  const hipY = (lHip.y+rHip.y)/2;
+  const armsUp = lWr.y < shoulderY - 0.05 && rWr.y < shoulderY - 0.05;
+  const handsOnHips = Math.abs(lWr.y-hipY) < 0.08 && Math.abs(rWr.y-hipY) < 0.08;
+  const oneArmUp = (lWr.y < shoulderY - 0.05) !== (rWr.y < shoulderY - 0.05);
+  const armsCrossed = dist(lWr, rSh) < 0.12 && dist(rWr, lSh) < 0.12;
+  if (armsCrossed) return '双臂交叉';
+  if (armsUp) return '双臂高举';
+  if (handsOnHips) return '叉腰';
+  if (oneArmUp) return '单臂上举';
+  return '自然站姿';
+}
+
+function cosineSim(a,b){
+  if (!a || !b || a.length !== b.length) return 0;
+  let dot=0,na=0,nb=0;
+  for (let i=0;i<a.length;i++){ dot+=a[i]*b[i]; na+=a[i]*a[i]; nb+=b[i]*b[i]; }
+  if (na===0||nb===0) return 0;
+  return dot/(Math.sqrt(na)*Math.sqrt(nb));
+}
+
+// ---------- Supabase 读写 ----------
+async function saveMeme(modality, label, vector, dataUrl){
+  const { error } = await supabase.from('memes').insert({
+    modality, label, vector, image: dataUrl, category: modality
+  });
   if (error) throw error;
 }
-async function loadMemesForCategory(category, limit=6){
+async function fetchMemesByModality(modality){
   const { data, error } = await supabase
     .from('memes')
-    .select('category,image,created_at')
-    .eq('category', category)
+    .select('image,label,vector,created_at')
+    .eq('modality', modality)
     .order('created_at', { ascending:false })
-    .limit(limit);
+    .limit(200);
   if (error){ console.error(error); return []; }
   return data || [];
 }
-async function countForCategory(category){
-  const { count, error } = await supabase
-    .from('memes')
-    .select('*', { count:'exact', head:true })
-    .eq('category', category);
-  if (error){ console.error(error); return 0; }
-  return count || 0;
-}
 
-async function renderResult(key, confidence){
-  currentCategory = key;
-  const title = CATEGORIES[key] || key;
-  resultLabel.textContent = title;
-  resultConf.textContent = confidence != null ? `置信度 ${(confidence*100).toFixed(0)}%` : '';
+async function updateResults(modality, vector, label){
+  modeTag.textContent = MODE_META[modality].tag;
+  resultTitle.textContent = label;
 
-  const memes = key === 'None' ? [] : await loadMemesForCategory(key, 6);
-  libCount.textContent = key === 'None' ? '' : `共享图库中该分类已有 ${ await countForCategory(key) } 张`;
+  const now = Date.now();
+  if (now - lastQueryTime < 500) return; // throttle
+  lastQueryTime = now;
 
-  memeArea.innerHTML = '';
-  const grid = document.createElement('div');
-  grid.className = 'meme-grid';
-
-  if (memes.length === 0){
-    memeArea.innerHTML = `<div class="empty-hint">这个分类还没有人上传真实表情包 ${SEED_EMOJI[key]||''}<br>做出这个${key==='None'?'手势/表情':'动作'}后，用下方按钮上传第一张吧！</div>`;
+  const pool = await fetchMemesByModality(modality);
+  if (pool.length === 0){
+    simInfo.textContent = '';
+    memeArea.innerHTML = `<div class="empty-hint">这个模式下图库还是空的 ✨<br>做出「${label}」后，点击左下角上传，成为第一个贡献者</div>`;
     return;
   }
-  memes.forEach(m => {
+  const scored = pool
+    .map(m => ({ ...m, sim: cosineSim(vector, m.vector) }))
+    .sort((a,b) => b.sim - a.sim)
+    .slice(0,6);
+
+  const relevant = scored.filter(s => s.sim > 0.55);
+  if (relevant.length === 0){
+    simInfo.textContent = '';
+    memeArea.innerHTML = `<div class="empty-hint">还没有足够相似的表情包<br>你可以做第一个上传「${label}」的人</div>`;
+    return;
+  }
+  simInfo.textContent = `最相似 ${(relevant[0].sim*100).toFixed(0)}%`;
+  const grid = document.createElement('div');
+  grid.className = 'meme-grid';
+  relevant.forEach(m => {
     const cell = document.createElement('div');
     cell.className = 'meme-cell';
-    const img = document.createElement('img');
-    img.src = m.image;
-    cell.appendChild(img);
+    cell.innerHTML = `<img src="${m.image}"><span class="sim-badge">${(m.sim*100).toFixed(0)}%</span>`;
     grid.appendChild(cell);
   });
+  memeArea.innerHTML = '';
   memeArea.appendChild(grid);
 }
 
 async function initModels(){
-  statusLine.textContent = '正在加载识别模型（首次加载需下载几 MB，请稍候）…';
   const vision = await FilesetResolver.forVisionTasks(
     "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
   );
   gestureRecognizer = await GestureRecognizer.createFromOptions(vision, {
-    baseOptions: {
-      modelAssetPath: "https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task",
-      delegate: "GPU"
-    },
-    runningMode: "VIDEO", numHands: 1
+    baseOptions: { modelAssetPath: "https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task", delegate:"GPU" },
+    runningMode:"VIDEO", numHands:1
   });
   faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
-    baseOptions: {
-      modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
-      delegate: "GPU"
-    },
-    outputFaceBlendshapes: true, runningMode: "VIDEO", numFaces: 1
+    baseOptions: { modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task", delegate:"GPU" },
+    outputFaceBlendshapes:true, runningMode:"VIDEO", numFaces:1
   });
-  statusLine.textContent = '模型加载完成，摄像头启动中…';
-}
-
-function classifyExpression(blendshapes){
-  const m = {};
-  blendshapes.forEach(b => m[b.categoryName] = b.score);
-  const smileScore = ((m['mouthSmileLeft']||0) + (m['mouthSmileRight']||0)) / 2;
-  const jawOpen = m['jawOpen'] || 0;
-  const browDown = ((m['browDownLeft']||0) + (m['browDownRight']||0)) / 2;
-  const browUp = m['browInnerUp'] || 0;
-  const frown = ((m['mouthFrownLeft']||0) + (m['mouthFrownRight']||0)) / 2;
-  const eyeWide = ((m['eyeWideLeft']||0) + (m['eyeWideRight']||0)) / 2;
-
-  const candidates = [
-    { key:'surprised', score: (jawOpen*0.6 + eyeWide*0.4 + browUp*0.3) },
-    { key:'happy',     score: smileScore * (jawOpen > 0.25 ? 1.2 : 0.9) },
-    { key:'smile',     score: smileScore * 0.8 },
-    { key:'angry',     score: browDown*0.7 + frown*0.3 },
-    { key:'sad',       score: frown*0.6 + browUp*0.2 },
-  ];
-  candidates.sort((a,b)=> b.score - a.score);
-  const top = candidates[0];
-  if (top.score < 0.28) return { key:'neutral', score: 1 - top.score };
-  return { key: top.key, score: Math.min(top.score, 0.99) };
+  poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
+    baseOptions: { modelAssetPath: "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task", delegate:"GPU" },
+    runningMode:"VIDEO", numPoses:1
+  });
 }
 
 async function loop(){
@@ -330,89 +476,113 @@ async function loop(){
   if (video.currentTime !== lastVideoTime){
     lastVideoTime = video.currentTime;
     const now = performance.now();
-    overlay.width = video.videoWidth;
-    overlay.height = video.videoHeight;
+    overlay.width = video.videoWidth; overlay.height = video.videoHeight;
     ctx.clearRect(0,0,overlay.width, overlay.height);
     const drawUtils = new DrawingUtils(ctx);
-    let handled = false;
 
-    const gResult = gestureRecognizer.recognizeForVideo(video, now);
-    if (gResult.gestures && gResult.gestures.length > 0 && gResult.gestures[0].length > 0){
-      const top = gResult.gestures[0][0];
-      if (gResult.landmarks && gResult.landmarks[0]){
-        drawUtils.drawConnectors(gResult.landmarks[0], GestureRecognizer.HAND_CONNECTIONS, { color:'#d9a441', lineWidth:3 });
-        drawUtils.drawLandmarks(gResult.landmarks[0], { color:'#c0392b', radius:3 });
+    let vector=null, label=null, detected=false;
+
+    if (mode === 'hand'){
+      const r = gestureRecognizer.recognizeForVideo(video, now);
+      if (r.landmarks && r.landmarks[0]){
+        drawUtils.drawConnectors(r.landmarks[0], GestureRecognizer.HAND_CONNECTIONS, { color:'#8a7ca8', lineWidth:3 });
+        drawUtils.drawLandmarks(r.landmarks[0], { color:'#5d6b8a', radius:3 });
+        vector = handVector(r.landmarks[0]);
+        label = handDescription(r.landmarks[0]);
+        detected = true;
       }
-      if (top.categoryName && top.categoryName !== 'None' && top.score > 0.55){
-        await renderResult(top.categoryName, top.score);
-        handled = true;
+    } else if (mode === 'face'){
+      const r = faceLandmarker.detectForVideo(video, now);
+      if (r.faceBlendshapes && r.faceBlendshapes[0]){
+        const cats = r.faceBlendshapes[0].categories;
+        vector = faceVector(cats);
+        label = faceDescription(cats);
+        detected = true;
+      }
+    } else if (mode === 'pose'){
+      const r = poseLandmarker.detectForVideo(video, now);
+      if (r.landmarks && r.landmarks[0]){
+        drawUtils.drawConnectors(r.landmarks[0], PoseLandmarker.POSE_CONNECTIONS, { color:'#c3d3bd', lineWidth:3 });
+        vector = poseVector(r.landmarks[0]);
+        label = poseDescription(r.landmarks[0]);
+        detected = true;
       }
     }
-    if (!handled){
-      const fResult = faceLandmarker.detectForVideo(video, now);
-      if (fResult.faceBlendshapes && fResult.faceBlendshapes.length > 0){
-        const shapes = fResult.faceBlendshapes[0].categories;
-        const { key, score } = classifyExpression(shapes);
-        await renderResult(key, score);
-        handled = true;
-      }
+
+    if (detected){
+      captionText.textContent = `识别到：${label}`;
+      currentSnapshot = { modality: mode, vector, label };
+      uploadBtn.disabled = false;
+      await updateResults(mode, vector, label);
+    } else {
+      captionText.textContent = mode === 'hand' ? '没看到手，伸进画面试试' : mode === 'face' ? '没看到脸，靠近一点试试' : '没看到身体，退后一点试试';
+      currentSnapshot = null;
+      uploadBtn.disabled = true;
     }
-    if (!handled) await renderResult('None', null);
   }
   rafId = requestAnimationFrame(loop);
 }
 
 startBtn.addEventListener('click', async () => {
   startBtn.disabled = true;
+  startBtn.textContent = '加载中…';
   try{
-    if (!gestureRecognizer || !faceLandmarker) await initModels();
-    stream = await navigator.mediaDevices.getUserMedia({ video: { width:640, height:480 }, audio:false });
+    if (!gestureRecognizer) await initModels();
+    stream = await navigator.mediaDevices.getUserMedia({ video:{ width:640, height:480 }, audio:false });
     video.srcObject = stream;
     await video.play();
-    setBadge('识别中', true);
-    statusLine.textContent = '识别运行中：比划手势或做表情试试看。';
+    idleInvite.style.display = 'none';
+    liveCaption.style.display = 'flex';
     running = true;
     stopBtn.disabled = false;
     loop();
   }catch(err){
     console.error(err);
-    statusLine.textContent = '摄像头启动失败：' + (err.message || err);
-    setBadge('启动失败', false);
+    startBtn.textContent = '开启摄像头';
     startBtn.disabled = false;
+    alert('摄像头启动失败：' + (err.message || err));
   }
 });
 
 stopBtn.addEventListener('click', () => {
   running = false;
   if (rafId) cancelAnimationFrame(rafId);
-  if (stream){ stream.getTracks().forEach(t => t.stop()); stream = null; }
+  if (stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
   ctx.clearRect(0,0,overlay.width, overlay.height);
-  setBadge('已停止', false);
-  statusLine.textContent = '已停止识别。可再次点击「启动摄像头」继续。';
+  idleInvite.style.display = 'flex';
+  liveCaption.style.display = 'none';
   stopBtn.disabled = true;
   startBtn.disabled = false;
+  startBtn.textContent = '开启摄像头';
+  uploadBtn.disabled = true;
+  currentSnapshot = null;
 });
 
 // ---------- 上传 ----------
-uploadBtn.addEventListener('click', () => fileInput.click());
+uploadBtn.addEventListener('click', () => {
+  if (!currentSnapshot) return;
+  fileInput.click();
+});
 
 fileInput.addEventListener('change', async () => {
   const file = fileInput.files[0];
-  if (!file) return;
-  const category = tagSelect.value;
+  if (!file || !currentSnapshot) return;
+  const snap = currentSnapshot;
   uploadBtn.disabled = true;
   uploadBtn.textContent = '上传中…';
   try{
     const dataUrl = await resizeToDataUrl(file, 480);
-    await saveMeme(category, dataUrl);
-    statusLine.textContent = `已上传到「${CATEGORIES[category]}」分类，感谢贡献！`;
-    if (currentCategory === category) await renderResult(category, null);
+    await saveMeme(snap.modality, snap.label, snap.vector, dataUrl);
+    modalMsg.textContent = `「${snap.label}」已加入表情包库`;
+    modalBackdrop.classList.add('show');
+    setTimeout(() => modalBackdrop.classList.remove('show'), 2200);
+    await updateResults(snap.modality, snap.vector, snap.label);
   }catch(e){
     console.error(e);
-    statusLine.textContent = '上传失败：' + (e.message || e);
+    alert('上传失败：' + (e.message || e));
   }finally{
     uploadBtn.disabled = false;
-    uploadBtn.textContent = '＋ 上传一张真实表情包到这个分类';
+    uploadBtn.textContent = '抓拍并上传';
     fileInput.value = '';
   }
 });
@@ -430,15 +600,12 @@ function resizeToDataUrl(file, maxSize){
       const c = document.createElement('canvas');
       c.width = width; c.height = height;
       c.getContext('2d').drawImage(img, 0, 0, width, height);
-      resolve(c.toDataURL('image/jpeg', 0.8));
+      resolve(c.toDataURL('image/jpeg', 0.82));
     };
     img.onerror = reject;
     reader.readAsDataURL(file);
   });
 }
-
-// initial idle preview
-renderResult('None', null);
 </script>
 </body>
 </html>
