@@ -88,9 +88,8 @@
     box-shadow:0 6px 14px -6px rgba(90,80,120,0.35);
   }
 
-  .video-box{
-    position:relative; width:100%; aspect-ratio:4/3; background:#20222a;
-    border-radius:18px; overflow:hidden;
+  #videoPane{
+    aspect-ratio:4/5; background:#20222a;
   }
   video, canvas.overlay{
     position:absolute; top:0; left:0; width:100%; height:100%;
@@ -160,18 +159,48 @@
     font-family:'Fraunces',serif; font-style:italic; font-weight:600;
     font-size:21px; margin:2px 0 14px; color:var(--ink);
   }
-  .meme-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
-  .meme-cell{
-    aspect-ratio:1; border-radius:14px; overflow:hidden; position:relative;
-    background:rgba(255,255,255,0.4); border:1px solid rgba(255,255,255,0.7);
+  .stage{
+    display:grid; grid-template-columns:1fr 1fr; gap:14px;
   }
-  .meme-cell img{width:100%; height:100%; object-fit:cover; display:block;}
-  .meme-cell .sim-badge{
-    position:absolute; top:6px; right:6px; background:rgba(30,30,38,0.55);
-    color:#fff; font-size:9.5px; padding:2px 7px; border-radius:10px; letter-spacing:0.3px;
+  @media (max-width:760px){ .stage{grid-template-columns:1fr; gap:10px;} }
+
+  .pane{
+    position:relative; width:100%; aspect-ratio:4/5; border-radius:22px; overflow:hidden;
+    background:#20222a;
   }
-  .empty-hint{
-    color:var(--ink-soft); font-size:12.5px; text-align:center; padding:34px 12px; line-height:2;
+  .pane-label{
+    position:absolute; top:12px; left:12px; z-index:2;
+    background:rgba(255,255,255,0.85); color:var(--accent-deep);
+    font-size:10.5px; font-weight:700; letter-spacing:2px; text-transform:uppercase;
+    padding:5px 12px; border-radius:20px;
+  }
+  .vs-divider{
+    display:none;
+  }
+  @media (min-width:761px){
+    .vs-divider{
+      display:flex; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+      width:38px; height:38px; border-radius:50%; background:var(--card-strong);
+      align-items:center; justify-content:center; font-family:'Fraunces',serif; font-style:italic;
+      font-size:14px; color:var(--accent-deep); z-index:3; box-shadow:0 8px 20px -8px rgba(60,50,80,0.4);
+    }
+  }
+  .stage-wrap{position:relative;}
+
+  .match-pane{ background:var(--card); display:flex; align-items:center; justify-content:center; }
+  .match-pane img{width:100%; height:100%; object-fit:cover; display:block;}
+  .match-pane .sim-big{
+    position:absolute; bottom:12px; right:12px; z-index:2;
+    background:rgba(30,30,38,0.6); color:#fff; font-size:12px; font-weight:600;
+    padding:6px 13px; border-radius:20px; letter-spacing:0.3px;
+  }
+  .match-pane .caption-big{
+    position:absolute; bottom:12px; left:12px; right:70px; z-index:2;
+    color:#fff; font-family:'Fraunces',serif; font-style:italic; font-size:15px;
+    text-shadow:0 2px 8px rgba(0,0,0,0.5);
+  }
+  .match-empty{
+    color:var(--ink-soft); font-size:12.5px; text-align:center; padding:20px; line-height:2;
   }
 
   /* success modal */
@@ -210,47 +239,45 @@
     <p>比划一个动作，让镜头帮你找到最像的表情包</p>
   </header>
 
-  <div class="layout">
-    <div class="card">
-      <div class="mode-toggle">
-        <button data-mode="hand" class="active">✋ 手势</button>
-        <button data-mode="face">🙂 表情</button>
-        <button data-mode="pose">🕺 动作</button>
-      </div>
-
-      <div class="video-box">
-        <video id="video" autoplay playsinline muted></video>
-        <canvas id="overlay" class="overlay"></canvas>
-        <div class="idle-invite" id="idleInvite">
-          <div class="pulse">📷</div>
-          <p>开启摄像头，比划一个手势、做个表情，或摆个姿势试试看</p>
-          <button id="startBtn">开启摄像头</button>
-        </div>
-        <div class="live-caption" id="liveCaption" style="display:none;">
-          <span class="dot"></span><span id="captionText">识别中…</span>
-        </div>
-      </div>
-
-      <div class="controls">
-        <button class="ghost" id="stopBtn" disabled>停止摄像头</button>
-      </div>
-
-      <div class="upload-strip">
-        <div class="msg" id="uploadInvite">随时上传一张表情包，系统会自动识别图里的手势 / 表情 / 动作</div>
-        <button id="uploadBtn">上传表情包</button>
-        <input type="file" id="fileInput" accept="image/*">
-      </div>
+  <div class="card">
+    <div class="mode-toggle">
+      <button data-mode="hand" class="active">✋ 手势</button>
+      <button data-mode="face">🙂 表情</button>
+      <button data-mode="pose">🕺 动作</button>
     </div>
 
-    <div class="card">
-      <div class="result-head">
-        <span class="tag" id="modeTag">HAND</span>
-        <span class="sim" id="simInfo"></span>
+    <div class="stage-wrap">
+      <div class="stage">
+        <div class="pane" id="videoPane">
+          <span class="pane-label">You</span>
+          <video id="video" autoplay playsinline muted></video>
+          <canvas id="overlay" class="overlay"></canvas>
+          <div class="idle-invite" id="idleInvite">
+            <div class="pulse">📷</div>
+            <p>开启摄像头，比划一个手势、做个表情，或摆个姿势试试看</p>
+            <button id="startBtn">开启摄像头</button>
+          </div>
+          <div class="live-caption" id="liveCaption" style="display:none;">
+            <span class="dot"></span><span id="captionText">识别中…</span>
+          </div>
+        </div>
+
+        <div class="pane match-pane" id="matchPane">
+          <span class="pane-label">Match</span>
+          <div class="match-empty" id="memeArea">开启摄像头后，这里会实时出现和你最像的那一张表情包</div>
+        </div>
       </div>
-      <div class="result-title" id="resultTitle">等待识别…</div>
-      <div id="memeArea">
-        <div class="empty-hint">开启摄像头后，这里会实时出现和你动作最像的表情包</div>
-      </div>
+      <div class="vs-divider">×</div>
+    </div>
+
+    <div class="controls">
+      <button class="ghost" id="stopBtn" disabled>停止摄像头</button>
+    </div>
+
+    <div class="upload-strip">
+      <div class="msg" id="uploadInvite">随时上传一张表情包，系统会自动识别图里的手势 / 表情 / 动作</div>
+      <button id="uploadBtn">上传表情包</button>
+      <input type="file" id="fileInput" accept="image/*">
     </div>
   </div>
 
@@ -286,9 +313,6 @@ const captionText = document.getElementById('captionText');
 const uploadBtn = document.getElementById('uploadBtn');
 const uploadInvite = document.getElementById('uploadInvite');
 const fileInput = document.getElementById('fileInput');
-const resultTitle = document.getElementById('resultTitle');
-const modeTag = document.getElementById('modeTag');
-const simInfo = document.getElementById('simInfo');
 const memeArea = document.getElementById('memeArea');
 const modalBackdrop = document.getElementById('modalBackdrop');
 const modalMsg = document.getElementById('modalMsg');
@@ -312,10 +336,8 @@ document.querySelectorAll('.mode-toggle button').forEach(btn => {
     document.querySelectorAll('.mode-toggle button').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     mode = btn.dataset.mode;
-    modeTag.textContent = MODE_META[mode].tag;
     currentSnapshot = null;
-    resultTitle.textContent = '等待识别…';
-    memeArea.innerHTML = `<div class="empty-hint">切换到「${MODE_META[mode].title}」模式，做出动作后这里会出现匹配结果</div>`;
+    memeArea.innerHTML = `<div class="match-empty">切换到「${MODE_META[mode].title}」模式，做出动作后这里会出现匹配结果</div>`;
   });
 });
 
@@ -416,41 +438,28 @@ async function fetchMemesByModality(modality){
 }
 
 async function updateResults(modality, vector, label){
-  modeTag.textContent = MODE_META[modality].tag;
-  resultTitle.textContent = label;
-
   const now = Date.now();
   if (now - lastQueryTime < 500) return; // throttle
   lastQueryTime = now;
 
   const pool = await fetchMemesByModality(modality);
   if (pool.length === 0){
-    simInfo.textContent = '';
-    memeArea.innerHTML = `<div class="empty-hint">这个模式下图库还是空的 ✨<br>做出「${label}」后，点击左下角上传，成为第一个贡献者</div>`;
+    memeArea.innerHTML = `<div class="match-empty">这个模式下图库还是空的 ✨<br>做出「${label}」后，点击下方上传，成为第一个贡献者</div>`;
     return;
   }
-  const scored = pool
+  const best = pool
     .map(m => ({ ...m, sim: cosineSim(vector, m.vector) }))
-    .sort((a,b) => b.sim - a.sim)
-    .slice(0,6);
+    .sort((a,b) => b.sim - a.sim)[0];
 
-  const relevant = scored.filter(s => s.sim > 0.55);
-  if (relevant.length === 0){
-    simInfo.textContent = '';
-    memeArea.innerHTML = `<div class="empty-hint">还没有足够相似的表情包<br>你可以做第一个上传「${label}」的人</div>`;
+  if (!best || best.sim <= 0.55){
+    memeArea.innerHTML = `<div class="match-empty">还没有足够相似的表情包<br>你可以做第一个上传「${label}」的人</div>`;
     return;
   }
-  simInfo.textContent = `最相似 ${(relevant[0].sim*100).toFixed(0)}%`;
-  const grid = document.createElement('div');
-  grid.className = 'meme-grid';
-  relevant.forEach(m => {
-    const cell = document.createElement('div');
-    cell.className = 'meme-cell';
-    cell.innerHTML = `<img src="${m.image}"><span class="sim-badge">${(m.sim*100).toFixed(0)}%</span>`;
-    grid.appendChild(cell);
-  });
-  memeArea.innerHTML = '';
-  memeArea.appendChild(grid);
+  memeArea.innerHTML = `
+    <img src="${best.image}">
+    <div class="caption-big">${label}</div>
+    <div class="sim-big">${(best.sim*100).toFixed(0)}% 相似</div>
+  `;
 }
 
 async function initModels(){
